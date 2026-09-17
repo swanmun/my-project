@@ -40,8 +40,8 @@
 
     <!-- 2. 정답 보기 -->
     <section class="card" id="sec-answer" hidden>
-      <h2>2. 정답 보기</h2>
-      <p class="help">스포일러입니다. 버튼을 눌러야 보입니다.</p>
+      <h2>2. 정답 보기 <span id="status" class="badge"></span></h2>
+      <p class="help" id="answer-help">스포일러입니다. 버튼을 눌러야 보입니다.</p>
       <button id="reveal-btn" type="button">정답 보기</button>
       <p id="answer" class="answer" hidden></p>
     </section>
@@ -49,7 +49,7 @@
     <!-- 3. 힌트 받기 -->
     <section class="card" id="sec-hint" hidden>
       <h2>3. 힌트 받기</h2>
-      <p class="help">꼬맨틀에 입력한 단어를 적으면, 그보다 조금 더 유사한 단어를 알려줍니다.</p>
+      <p class="help" id="hint-help">꼬맨틀에 입력한 단어를 적으면, 그보다 조금 더 유사한 단어를 알려줍니다.</p>
       <form id="hint-form">
         <div class="row">
           <label class="grow">단어 <input id="word" type="text" autocomplete="off" required /></label>

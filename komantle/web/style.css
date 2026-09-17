@@ -40,3 +40,6 @@ footer { max-width:720px; margin:0 auto; padding:16px; color:var(--muted); font-
 .clues .row label { flex:1 1 100px; }
 .clues .row button { flex:0 0 auto; }
 .actions { justify-content: space-between; align-items: center; }
+.badge { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:999px; font-size:.75rem; font-weight:600; vertical-align:middle; }
+.badge.ok { background:#dcfce7; color:var(--ok); }
+.badge.warn { background:#fef3c7; color:var(--warn); }
