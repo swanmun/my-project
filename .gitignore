@@ -45,3 +45,6 @@ next-env.d.ts
 web_data/
 *.pkl
 *.npz
+# komantle solver build output
+komantle/dist/
+komantle/.wrangler/

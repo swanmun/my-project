@@ -1,0 +1,8 @@
+{
+  // 정적 자산 전용 Worker (Worker 스크립트 없음)
+  "name": "komantle-solver",
+  "compatibility_date": "2026-09-17",
+  "assets": {
+    "directory": "./dist"
+  }
+}

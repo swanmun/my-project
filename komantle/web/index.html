@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>꼬맨틀 솔버</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>꼬맨틀 솔버</h1>
+    <p class="sub">서버 없이 브라우저에서만 계산합니다. 입력한 내용은 이 기기에만 저장됩니다.</p>
+  </header>
+
+  <main>
+    <!-- 1. 세 숫자 입력 -->
+    <section class="card" id="sec-find">
+      <h2>1. 세 숫자 입력</h2>
+      <p class="help">꼬맨틀 첫 화면 상단 문장의 숫자를 그대로 입력하세요. 문장 전체를 붙여넣어도 됩니다.</p>
+      <textarea id="paste" rows="2" placeholder="예) 정답 단어와 가장 유사한 단어의 유사도는 52.97 입니다. 10번째로 … 45.92이고, 1,000번째로 … 29.64 입니다."></textarea>
+      <form id="find-form" class="row">
+        <label>1위 <input id="top" type="number" step="0.01" inputmode="decimal" required /></label>
+        <label>10위 <input id="top10" type="number" step="0.01" inputmode="decimal" required /></label>
+        <label>1,000위 <span class="opt">(선택)</span> <input id="rest" type="number" step="0.01" inputmode="decimal" /></label>
+        <button type="submit" id="find-btn">찾기</button>
+      </form>
+      <p id="round" class="muted"></p>
+      <p id="find-msg" class="msg"></p>
+      <div id="candidates" class="cands"></div>
+    </section>
+
+    <!-- 2. 정답 보기 -->
+    <section class="card" id="sec-answer" hidden>
+      <h2>2. 정답 보기</h2>
+      <p class="help">스포일러입니다. 버튼을 눌러야 보입니다.</p>
+      <button id="reveal-btn" type="button">정답 보기</button>
+      <p id="answer" class="answer" hidden></p>
+    </section>
+
+    <!-- 3. 힌트 받기 -->
+    <section class="card" id="sec-hint" hidden>
+      <h2>3. 힌트 받기</h2>
+      <p class="help">꼬맨틀에 입력한 단어를 적으면, 그보다 조금 더 유사한 단어를 알려줍니다.</p>
+      <form id="hint-form">
+        <div class="row">
+          <label class="grow">단어 <input id="word" type="text" autocomplete="off" required /></label>
+          <label id="sim-wrap" hidden>유사도 <input id="sim" type="number" step="0.01" inputmode="decimal" /></label>
+        </div>
+        <p id="sim-help" class="msg" hidden>이웃 목록에 없는 단어입니다. 꼬맨틀에 나온 유사도를 입력해주세요.</p>
+        <div class="row">
+          <fieldset class="steps">
+            <label><input type="radio" name="step" value="2" /> 조금 (+2)</label>
+            <label><input type="radio" name="step" value="5" checked /> 보통 (+5)</label>
+            <label><input type="radio" name="step" value="10" /> 많이 (+10)</label>
+          </fieldset>
+          <button type="submit">힌트</button>
+        </div>
+      </form>
+      <p id="hint-msg" class="msg"></p>
+      <div id="my-word" class="mine"></div>
+      <ul id="hints" class="hints"></ul>
+
+      <h3>입력한 단어</h3>
+      <table id="history">
+        <thead><tr><th>단어</th><th>유사도</th><th>순위</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <button id="clear-btn" type="button" class="link">기록 지우기</button>
+    </section>
+  </main>
+
+  <footer>
+    데이터·규칙 출처: 꼬맨틀(뉴스젤리), FastText. 로컬 순위는 사이트 순위보다 몇 칸 뒤로 나올 수 있습니다.
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
