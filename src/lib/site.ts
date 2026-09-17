@@ -5,9 +5,11 @@ export const siteConfig = {
   description: "서비스 설명을 적어주세요",
 };
 
+export const komantleSolverUrl = "https://komantle-solver.msw4118.workers.dev";
+
 export const navItems = [
   { href: "/items", label: "둘러보기" },
   { href: "/map", label: "지도" },
   { href: "/mypage", label: "마이페이지" },
-  { href: "https://komantle-solver.msw4118.workers.dev", label: "꼬맨틀 솔버" },
+  { href: komantleSolverUrl, label: "꼬맨틀 솔버" },
 ];
