@@ -6,7 +6,7 @@
 
 꼬맨틀 첫 화면의 세 숫자(1위·10위·1,000위 유사도)로 정답을 찾고, 입력한 단어보다 조금 더 유사한 단어를 힌트로 보여주는 정적 웹페이지입니다.
 
-- 배포 주소: https://komantle-solver.msw4118.workers.dev
+- 배포 주소: https://komantle-solver.mmmn.workers.dev
 - 메인 사이트: https://my-project-beige-rho-63.vercel.app
 - 소스: `komantle/` (자세한 사용법·배포 방법은 `komantle/README.md`)
 - 서버 코드 없음, 외부 API 호출 없음. 모든 계산은 브라우저에서 정적 파일만으로 합니다.
@@ -34,7 +34,7 @@ npm run dev                  # http://localhost:3000
 | 대상 | 방법 | 주소 |
 | --- | --- | --- |
 | 메인 사이트 (Next.js) | **Vercel**, GitHub 연동 자동 배포 | https://my-project-beige-rho-63.vercel.app |
-| 꼬맨틀 솔버 (`komantle/`) | **Cloudflare**, 로컬에서 `npm run deploy` | https://komantle-solver.msw4118.workers.dev |
+| 꼬맨틀 솔버 (`komantle/`) | **Cloudflare**, 로컬에서 `npm run deploy` | https://komantle-solver.mmmn.workers.dev |
 
 ### 메인 사이트 → Vercel
 

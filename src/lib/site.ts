@@ -5,7 +5,7 @@ export const siteConfig = {
   description: "서비스 설명을 적어주세요",
 };
 
-export const komantleSolverUrl = "https://komantle-solver.msw4118.workers.dev";
+export const komantleSolverUrl = "https://komantle-solver.mmmn.workers.dev";
 
 export const navItems = [
   { href: "/items", label: "둘러보기" },
