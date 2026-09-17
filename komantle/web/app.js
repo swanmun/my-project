@@ -1,4 +1,4 @@
-import { resolve, parseKomantleText, hints, findNeighbor, loadFingerprint, loadNeighbors, lookupWord } from "./solver.js";
+import { resolve, parseKomantleText, hints, findNeighbor, loadFingerprint, loadNeighbors, loadCandidateVectors, lookupVector, simsToCandidates } from "./solver.js";
 
 const $ = (id) => document.getElementById(id);
 const STORE_KEY = "komantle-solver";
@@ -56,17 +56,24 @@ $("find-form").addEventListener("submit", async (e) => {
   try {
     const fp = await loadFingerprint();
     const clues = readClues();
-    const lookups = await Promise.all(clues.map((c) => lookupWord(c.word)));
-    const r = resolve(fp, top, top10, rest, clues, lookups);
+    let clueSims = [];
+    if (clues.length) {
+      const [cand, vecs] = await Promise.all([loadCandidateVectors(), Promise.all(clues.map((c) => lookupVector(c.word)))]);
+      clueSims = vecs.map((v) => (v ? simsToCandidates(cand, v) : null));
+    }
+    const missing = clues.filter((_, k) => clueSims[k] === null).map((c) => c.word);
+    const r = resolve(fp, top, top10, rest, clues, clueSims);
     // 다른 세 숫자면 기록 초기화
     if (state.top !== top || state.top10 !== top10 || state.rest !== rest) {
       state = { ...state, top, top10, rest, index: null, history: [] };
     }
     state.clues = clues;
     if (r.byClue && r.candidates.length === 1) setMsg($("find-msg"), "단어 단서로 정답을 찾았습니다.", true);
-    else if (r.byClue) setMsg($("find-msg"), `단서에 맞는 후보가 ${r.candidates.length}개입니다. 단서를 하나 더 넣거나, 하나를 고르세요.`);
+    else if (r.byClue) { setMsg($("find-msg"), `단서에 맞는 후보가 ${r.candidates.length}개입니다. 단서를 하나 더 넣고 다시 찾으면 특정됩니다. (후보 1이 가장 유력)`); if (readClues().length >= $("clue-rows").children.length) addClueRow(); }
     else if (r.clueMiss) {
-      setMsg($("find-msg"), "단서에 맞는 후보가 없습니다. 단어·유사도를 확인하세요. (세 숫자로 가장 가까운 후보를 보여줍니다)");
+      setMsg($("find-msg"), missing.length
+        ? `꼬맨틀 어휘에 없는 단어입니다: ${missing.join(", ")}. 꼬맨틀에 친 그대로 입력했는지 확인하세요. (세 숫자로 가장 가까운 후보를 보여줍니다)`
+        : "단서에 맞는 후보가 없습니다. 유사도를 꼬맨틀에 나온 숫자 그대로 넣었는지 확인하세요. (세 숫자로 가장 가까운 후보를 보여줍니다)");
       $("clue-box").open = true;
     } else if (r.approx) {
       setMsg($("find-msg"), "세 숫자가 정확히 일치하지 않습니다. 꼬맨틀에 친 단어와 유사도를 '단어 단서'에 넣고 다시 찾아보세요. (지금은 가장 가까운 후보를 보여줍니다)");
@@ -236,4 +243,4 @@ if (state.top != null) {
       .catch(() => {});
   }
 }
-if (!$("clue-rows").children.length) addClueRow();
+while ($("clue-rows").children.length < 2) addClueRow();

@@ -37,16 +37,51 @@ export function hashWord(word) {
   return h % SHARDS;
 }
 
+export const DIMS = 300;
+
+/** float16(리틀엔디언) 버퍼 → Float32Array */
+export function decodeFloat16(buffer) {
+  const u16 = new Uint16Array(buffer);
+  const out = new Float32Array(u16.length);
+  for (let i = 0; i < u16.length; i++) {
+    const h = u16[i];
+    const sign = h & 0x8000 ? -1 : 1;
+    const exp = (h >> 10) & 0x1f;
+    const frac = h & 0x3ff;
+    if (exp === 0) out[i] = sign * frac * 2 ** -24;
+    else if (exp === 31) out[i] = frac ? NaN : sign * Infinity;
+    else out[i] = sign * (1 + frac / 1024) * 2 ** (exp - 15);
+  }
+  return out;
+}
+
+/** 단어 벡터와 모든 후보 벡터의 코사인 유사도 ×100 (벡터는 정규화돼 있음) */
+export function simsToCandidates(cand, vec) {
+  const n = cand.length / DIMS;
+  const out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    let dot = 0;
+    const off = i * DIMS;
+    for (let d = 0; d < DIMS; d++) dot += cand[off + d] * vec[d];
+    out[i] = dot * 100;
+  }
+  return out;
+}
+
 /**
  * 단서(꼬맨틀에서 친 단어 + 유사도)로 후보를 좁힌다.
- * lookups: 단어별 역색인 결과 [[후보 인덱스, 유사도], ...] (없으면 null)
+ * clueSims[k]: k번째 단서 단어의 후보별 유사도 배열 (simsToCandidates 결과). 어휘에 없는 단어면 null.
  * 반환: 모든 단서를 만족하는 후보 인덱스 배열. 단서가 없으면 null.
+ * tol: float16 반올림 오차(≤0.011)와 사이트 표시 반올림(0.005)을 감안해 0.02.
+ * 단어 하나로는 후보가 여럿 남는 경우가 많고(약 80%), 둘이면 99.7%, 셋이면 사실상 100% 특정된다.
  */
-export function matchClues(clues, lookups, tol = 0.02) {
+export function matchClues(clues, clueSims, tol = 0.02) {
   if (!clues.length) return null;
   let set = null;
   clues.forEach((c, k) => {
-    const hits = new Set((lookups[k] || []).filter(([, sim]) => Math.abs(sim - c.sim) <= tol).map(([i]) => i));
+    const sims = clueSims[k];
+    const hits = new Set();
+    if (sims) for (let i = 0; i < sims.length; i++) if (Math.abs(sims[i] - c.sim) <= tol) hits.add(i);
     set = set === null ? hits : new Set([...set].filter((i) => hits.has(i)));
   });
   return [...set];
@@ -56,13 +91,13 @@ export function matchClues(clues, lookups, tol = 0.02) {
  * 세 숫자 + 단서를 합쳐 최종 후보를 정한다.
  * - 단서가 있으면 단서 결과를 우선하고, 여러 개면 지문 오차가 작은 순으로 정렬한다.
  * - 단서가 없으면 지문 대조만 쓴다.
- * 반환: { candidates, approx, byClue }
+ * 반환: { candidates, approx, byClue, clueMiss }
  */
-export function resolve(fp, top, top10, rest, clues = [], lookups = []) {
+export function resolve(fp, top, top10, rest, clues = [], clueSims = []) {
   const fpErr = (i) => Math.max(Math.abs(fp[i * 3] - top), Math.abs(fp[i * 3 + 1] - top10));
-  const byClue = matchClues(clues, lookups);
+  const byClue = matchClues(clues, clueSims);
   if (byClue && byClue.length) {
-    return { candidates: byClue.sort((a, b) => fpErr(a) - fpErr(b)), approx: false, byClue: true };
+    return { candidates: byClue.sort((a, b) => fpErr(a) - fpErr(b)), approx: false, byClue: true, clueMiss: false };
   }
   const r = matchFingerprint(fp, top, top10, rest);
   return { ...r, byClue: false, clueMiss: !!(byClue && !byClue.length) };
@@ -116,17 +151,32 @@ export async function loadFingerprint(base = DATA_BASE) {
   return fpCache;
 }
 
-const shardCache = new Map();
+let candCache = null;
+const vecShardCache = new Map();
 
-/** 단어의 역색인 항목을 돌려준다: [[후보 인덱스, 유사도], ...] 또는 null. shard 파일은 한 번만 받는다. */
-export async function lookupWord(word, base = DATA_BASE) {
-  const k = hashWord(word);
-  if (!shardCache.has(k)) {
-    const res = await fetch(`${base}/idx/${k}.json`);
-    if (!res.ok) throw new Error("단어 색인 로딩 실패");
-    shardCache.set(k, await res.json());
+/** 후보 벡터(4650×300 float16)를 한 번만 받아 Float32Array로 둔다. */
+export async function loadCandidateVectors(base = DATA_BASE) {
+  if (!candCache) {
+    const res = await fetch(`${base}/cand.bin`);
+    if (!res.ok) throw new Error("cand.bin 로딩 실패");
+    candCache = decodeFloat16(await res.arrayBuffer());
   }
-  return shardCache.get(k)[word] ?? null;
+  return candCache;
+}
+
+/** 단어의 벡터(Float32Array 300)를 돌려준다. 어휘에 없으면 null. shard는 한 번만 받는다. */
+export async function lookupVector(word, base = DATA_BASE) {
+  const k = hashWord(word);
+  if (!vecShardCache.has(k)) {
+    const [words, bin] = await Promise.all([
+      fetch(`${base}/vec/${k}.json`).then((r) => { if (!r.ok) throw new Error("단어 벡터 로딩 실패"); return r.json(); }),
+      fetch(`${base}/vec/${k}.bin`).then((r) => { if (!r.ok) throw new Error("단어 벡터 로딩 실패"); return r.arrayBuffer(); }),
+    ]);
+    vecShardCache.set(k, { words, vecs: decodeFloat16(bin) });
+  }
+  const { words, vecs } = vecShardCache.get(k);
+  const j = words.indexOf(word);
+  return j < 0 ? null : vecs.subarray(j * DIMS, (j + 1) * DIMS);
 }
 
 export async function loadNeighbors(index, base = DATA_BASE) {

@@ -57,32 +57,65 @@ test("힌트: 정답 없음, exclude 반영, 전부 guessSim보다 높음", () =
   assert.equal(hints(neighbors, neighbors[0][1], 2, 5, new Set(), answer).length, 0);
 });
 
-// ---- 단서(단어 + 유사도) 매칭 ----
-import { hashWord, matchClues, resolve, SHARDS } from "../web/solver.js";
+// ---- 단서(단어 + 유사도) 매칭: 단어 벡터로 어떤 단어든 대조 ----
+import { hashWord, matchClues, resolve, SHARDS, DIMS, decodeFloat16, simsToCandidates } from "../web/solver.js";
 
-const lookupLocal = (word) => {
-  const shard = JSON.parse(readFileSync(new URL(`idx/${hashWord(word)}.json`, DATA), "utf8"));
-  return shard[word] ?? null;
+const candBuf = readFileSync(new URL("cand.bin", DATA));
+const cand = decodeFloat16(candBuf.buffer.slice(candBuf.byteOffset, candBuf.byteOffset + candBuf.byteLength));
+const vectorLocal = (word) => {
+  const k = hashWord(word);
+  const words = JSON.parse(readFileSync(new URL(`vec/${k}.json`, DATA), "utf8"));
+  const j = words.indexOf(word);
+  if (j < 0) return null;
+  const b = readFileSync(new URL(`vec/${k}.bin`, DATA));
+  return decodeFloat16(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)).subarray(j * DIMS, (j + 1) * DIMS);
 };
+const clueSimsLocal = (clues) => clues.map((c) => { const v = vectorLocal(c.word); return v ? simsToCandidates(cand, v) : null; });
 
-test("hashWord는 shard 범위 안의 안정된 값", () => {
-  assert.equal(hashWord("돌아앉아"), hashWord("돌아앉아"));
-  for (const w of ["돌아앉아", "a", "한글테스트"]) assert.ok(hashWord(w) >= 0 && hashWord(w) < SHARDS);
+test("hashWord는 shard 범위 안의 안정된 값 (Python export_vectors.py와 동일)", () => {
+  assert.equal(hashWord("돌아앉아"), 392);
+  assert.equal(hashWord("a"), 300);
+  assert.ok(hashWord("한글테스트") < SHARDS);
 });
 
-test("1631회차: 지문은 안 맞지만 단서(돌아앉아 30.80)로 [1631] 특정", () => {
-  const clues = [{ word: "돌아앉아", sim: 30.8 }];
-  const lookups = clues.map((c) => lookupLocal(c.word));
-  const fpOnly = matchFingerprint(fp, 41.03, 36.09, 25.89);
-  assert.equal(fpOnly.approx, true);
-  assert.deepEqual(matchClues(clues, lookups), [1631]);
-  const r = resolve(fp, 41.03, 36.09, 25.89, clues, lookups);
-  assert.deepEqual(r, { candidates: [1631], approx: false, byClue: true });
+test("벡터 유사도가 이웃 목록의 유사도와 일치 (오차 0.02 이내)", () => {
+  const { n } = JSON.parse(readFileSync(new URL("n/1631.json", DATA), "utf8"));
+  const [w, sim] = n[284]; // 돌아앉아 30.80 근처
+  const sims = simsToCandidates(cand, vectorLocal(w));
+  assert.ok(Math.abs(sims[1631] - sim) <= 0.02, `${sims[1631]} vs ${sim}`);
+  assert.equal(w, "돌아앉아");
 });
 
-test("단서가 어디에도 없으면 지문 결과로 폴백 + clueMiss", () => {
-  const clues = [{ word: "돌아앉아", sim: 99 }];
-  const r = resolve(fp, 52.97, 45.92, 29.64, clues, clues.map((c) => lookupLocal(c.word)));
+test("1631회차: 지문은 안 맞지만 단서(돌아앉아 30.80)로 1631이 1순위, 단서 2개면 [1631] 특정", () => {
+  assert.equal(matchFingerprint(fp, 41.03, 36.09, 25.89).approx, true);
+  const one = [{ word: "돌아앉아", sim: 30.8 }];
+  const r1 = resolve(fp, 41.03, 36.09, 25.89, one, clueSimsLocal(one));
+  assert.equal(r1.byClue, true);
+  assert.equal(r1.candidates[0], 1631);
+  // 두 번째 단서: 1631 이웃 목록의 500위 단어와 그 유사도(사이트가 보여줄 값)
+  const { n } = JSON.parse(readFileSync(new URL("n/1631.json", DATA), "utf8"));
+  const two = [...one, { word: n[499][0], sim: n[499][1] }];
+  const r2 = resolve(fp, 41.03, 36.09, 25.89, two, clueSimsLocal(two));
+  assert.deepEqual(r2, { candidates: [1631], approx: false, byClue: true, clueMiss: false });
+});
+
+test("이웃 1,000위 밖의 낮은 유사도 단어도 단서로 동작", () => {
+  // 1631의 이웃 목록에 없는 단어를 찾아 실제 유사도를 계산한 뒤 그 값으로 단서를 만든다
+  const { n } = JSON.parse(readFileSync(new URL("n/1631.json", DATA), "utf8"));
+  const inList = new Set(n.map(([w]) => w));
+  const words = JSON.parse(readFileSync(new URL("vec/7.json", DATA), "utf8"));
+  const w = words.find((x) => !inList.has(x));
+  const sims = simsToCandidates(cand, vectorLocal(w));
+  const sim = Math.round(sims[1631] * 100) / 100;
+  assert.ok(sim < 25.89, `1000위 밖이어야 함: ${sim}`);
+  const r = resolve(fp, 41.03, 36.09, 25.89, [{ word: w, sim }], clueSimsLocal([{ word: w, sim }]));
+  assert.ok(r.byClue && r.candidates.includes(1631));
+  assert.ok(r.candidates.length <= 3, `후보 ${r.candidates.length}개`);
+});
+
+test("어휘에 없는 단어는 clueMiss + 지문 폴백", () => {
+  const clues = [{ word: "없는단어zzz", sim: 30 }];
+  const r = resolve(fp, 52.97, 45.92, 29.64, clues, clueSimsLocal(clues));
   assert.deepEqual(r.candidates, [1630]);
   assert.equal(r.clueMiss, true);
 });
