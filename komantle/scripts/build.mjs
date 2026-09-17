@@ -14,6 +14,10 @@ if (!existsSync(join(DATA, "fp.bin")) || !existsSync(join(DATA, "n"))) {
   console.error(`데이터 폴더가 없습니다: ${DATA}\n먼저 komantle 폴더에서 python export_web_data.py 를 실행하세요.`);
   process.exit(1);
 }
+if (!existsSync(join(DATA, "idx"))) {
+  console.error("단어 역색인(idx/)이 없습니다. 먼저 npm run index 를 실행하세요.");
+  process.exit(1);
+}
 
 function removeDir(dir, keepRoot = false) {
   if (!existsSync(dir)) return;

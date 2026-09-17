@@ -56,3 +56,37 @@ test("힌트: 정답 없음, exclude 반영, 전부 guessSim보다 높음", () =
   // 1위 이상이면 힌트 없음
   assert.equal(hints(neighbors, neighbors[0][1], 2, 5, new Set(), answer).length, 0);
 });
+
+// ---- 단서(단어 + 유사도) 매칭 ----
+import { hashWord, matchClues, resolve, SHARDS } from "../web/solver.js";
+
+const lookupLocal = (word) => {
+  const shard = JSON.parse(readFileSync(new URL(`idx/${hashWord(word)}.json`, DATA), "utf8"));
+  return shard[word] ?? null;
+};
+
+test("hashWord는 shard 범위 안의 안정된 값", () => {
+  assert.equal(hashWord("돌아앉아"), hashWord("돌아앉아"));
+  for (const w of ["돌아앉아", "a", "한글테스트"]) assert.ok(hashWord(w) >= 0 && hashWord(w) < SHARDS);
+});
+
+test("1631회차: 지문은 안 맞지만 단서(돌아앉아 30.80)로 [1631] 특정", () => {
+  const clues = [{ word: "돌아앉아", sim: 30.8 }];
+  const lookups = clues.map((c) => lookupLocal(c.word));
+  const fpOnly = matchFingerprint(fp, 41.03, 36.09, 25.89);
+  assert.equal(fpOnly.approx, true);
+  assert.deepEqual(matchClues(clues, lookups), [1631]);
+  const r = resolve(fp, 41.03, 36.09, 25.89, clues, lookups);
+  assert.deepEqual(r, { candidates: [1631], approx: false, byClue: true });
+});
+
+test("단서가 어디에도 없으면 지문 결과로 폴백 + clueMiss", () => {
+  const clues = [{ word: "돌아앉아", sim: 99 }];
+  const r = resolve(fp, 52.97, 45.92, 29.64, clues, clues.map((c) => lookupLocal(c.word)));
+  assert.deepEqual(r.candidates, [1630]);
+  assert.equal(r.clueMiss, true);
+});
+
+test("단서 없으면 기존 지문 대조와 동일", () => {
+  assert.deepEqual(resolve(fp, 52.97, 45.92, 29.64), { candidates: [1630], approx: false, byClue: false, clueMiss: false });
+});

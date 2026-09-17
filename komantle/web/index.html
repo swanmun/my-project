@@ -22,8 +22,16 @@
         <label>1위 <input id="top" type="number" step="0.01" inputmode="decimal" required /></label>
         <label>10위 <input id="top10" type="number" step="0.01" inputmode="decimal" required /></label>
         <label>1,000위 <span class="opt">(선택)</span> <input id="rest" type="number" step="0.01" inputmode="decimal" /></label>
-        <button type="submit" id="find-btn">찾기</button>
       </form>
+      <details id="clue-box" class="clues">
+        <summary>단어 단서 <span class="opt">(선택 · 세 숫자로 안 찾아질 때)</span></summary>
+        <p class="help">꼬맨틀에 이미 친 단어와 그때 나온 유사도를 넣으면 훨씬 정확하게 찾습니다. 상단 숫자는 사이트와 조금 다를 수 있지만, 단어 유사도는 정확히 같습니다.</p>
+        <div id="clue-rows"></div>
+        <button type="button" id="clue-add" class="link">+ 단서 추가</button>
+      </details>
+      <div class="row">
+        <button type="submit" form="find-form" id="find-btn">찾기</button>
+      </div>
       <p id="round" class="muted"></p>
       <p id="find-msg" class="msg"></p>
       <div id="candidates" class="cands"></div>

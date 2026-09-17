@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test test/solver.test.mjs",
+    "index": "node scripts/build-index.mjs",
     "build": "node scripts/build.mjs",
     "dev": "npm run build && npx wrangler dev",
     "deploy": "npm run build && npx wrangler deploy"

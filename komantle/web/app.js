@@ -1,10 +1,10 @@
-import { matchFingerprint, parseKomantleText, hints, findNeighbor, loadFingerprint, loadNeighbors } from "./solver.js";
+import { resolve, parseKomantleText, hints, findNeighbor, loadFingerprint, loadNeighbors, lookupWord } from "./solver.js";
 
 const $ = (id) => document.getElementById(id);
 const STORE_KEY = "komantle-solver";
 
 // ---- 상태 ----
-let state = { top: null, top10: null, rest: null, round: null, index: null, history: [] };
+let state = { top: null, top10: null, rest: null, round: null, index: null, history: [], clues: [] };
 let data = null; // { a: 정답, n: 이웃 }
 let revealed = false;
 
@@ -25,6 +25,26 @@ $("paste").addEventListener("input", (e) => {
   state.round = p.round;
 });
 
+// ---- 단어 단서 입력 행 ----
+function addClueRow(word = "", sim = "") {
+  const row = document.createElement("div");
+  row.className = "row";
+  row.innerHTML = `<label>단어 <input type="text" class="clue-word" autocomplete="off" /></label>
+    <label>유사도 <input type="number" class="clue-sim" step="0.01" inputmode="decimal" /></label>
+    <button type="button" class="link clue-del">삭제</button>`;
+  row.querySelector(".clue-word").value = word;
+  row.querySelector(".clue-sim").value = sim;
+  row.querySelector(".clue-del").onclick = () => row.remove();
+  $("clue-rows").appendChild(row);
+}
+function readClues() {
+  return [...$("clue-rows").querySelectorAll(".row")]
+    .map((r) => ({ word: r.querySelector(".clue-word").value.trim(), sim: Number(r.querySelector(".clue-sim").value) }))
+    .filter((c) => c.word && isValidSim(c.sim));
+}
+const isValidSim = (v) => typeof v === "number" && !Number.isNaN(v) && v !== 0;
+$("clue-add").addEventListener("click", () => addClueRow());
+
 $("find-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const top = Number($("top").value);
@@ -35,13 +55,23 @@ $("find-form").addEventListener("submit", async (e) => {
   $("candidates").innerHTML = "";
   try {
     const fp = await loadFingerprint();
-    const r = matchFingerprint(fp, top, top10, rest);
+    const clues = readClues();
+    const lookups = await Promise.all(clues.map((c) => lookupWord(c.word)));
+    const r = resolve(fp, top, top10, rest, clues, lookups);
     // 다른 세 숫자면 기록 초기화
     if (state.top !== top || state.top10 !== top10 || state.rest !== rest) {
       state = { ...state, top, top10, rest, index: null, history: [] };
     }
-    if (r.approx) setMsg($("find-msg"), "정확히 일치하지 않음. 입력값을 확인하세요. (가장 가까운 후보를 보여줍니다)");
-    else if (r.candidates.length > 1) setMsg($("find-msg"), `후보가 ${r.candidates.length}개입니다. 하나를 고르세요.`);
+    state.clues = clues;
+    if (r.byClue && r.candidates.length === 1) setMsg($("find-msg"), "단어 단서로 정답을 찾았습니다.", true);
+    else if (r.byClue) setMsg($("find-msg"), `단서에 맞는 후보가 ${r.candidates.length}개입니다. 단서를 하나 더 넣거나, 하나를 고르세요.`);
+    else if (r.clueMiss) {
+      setMsg($("find-msg"), "단서에 맞는 후보가 없습니다. 단어·유사도를 확인하세요. (세 숫자로 가장 가까운 후보를 보여줍니다)");
+      $("clue-box").open = true;
+    } else if (r.approx) {
+      setMsg($("find-msg"), "세 숫자가 정확히 일치하지 않습니다. 꼬맨틀에 친 단어와 유사도를 '단어 단서'에 넣고 다시 찾아보세요. (지금은 가장 가까운 후보를 보여줍니다)");
+      $("clue-box").open = true;
+    } else if (r.candidates.length > 1) setMsg($("find-msg"), `후보가 ${r.candidates.length}개입니다. 하나를 고르세요.`);
     else setMsg($("find-msg"), "정답을 찾았습니다.", true);
 
     if (r.candidates.length > 1) {
@@ -198,9 +228,12 @@ if (state.top != null) {
   $("top10").value = state.top10;
   $("rest").value = state.rest ?? "";
   if (state.round) $("round").textContent = `${state.round}번째 꼬맨틀`;
+  for (const c of state.clues ?? []) addClueRow(c.word, c.sim);
+  if (state.clues?.length) $("clue-box").open = true;
   if (state.index != null) {
     loadNeighbors(state.index)
       .then((d) => { data = d; $("sec-answer").hidden = false; $("sec-hint").hidden = false; renderHistory(); })
       .catch(() => {});
   }
 }
+if (!$("clue-rows").children.length) addClueRow();
