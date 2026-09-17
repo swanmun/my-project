@@ -18,6 +18,12 @@ function fmt(n) { return Number(n).toFixed(2); }
 $("paste").addEventListener("input", (e) => {
   const p = parseKomantleText(e.target.value);
   if (!p) return;
+  // 다른 회차 문장을 붙여넣으면 이전 회차의 단서·기록을 자동으로 비운다
+  if (p.round && state.round && p.round !== state.round) {
+    const keep = e.target.value;
+    resetAll();
+    $("paste").value = keep;
+  }
   $("top").value = p.top;
   $("top10").value = p.top10;
   $("rest").value = p.rest ?? "";
@@ -226,6 +232,32 @@ $("clear-btn").addEventListener("click", () => {
   $("hints").innerHTML = "";
   $("my-word").textContent = "";
   setMsg($("hint-msg"), "");
+});
+
+// ---- 전체 초기화: 세 숫자·단서·기록 모두 삭제 ----
+function resetAll() {
+  state = { top: null, top10: null, rest: null, round: null, index: null, history: [], clues: [] };
+  data = null;
+  revealed = false;
+  try { localStorage.removeItem(STORE_KEY); } catch {}
+  $("paste").value = "";
+  $("top").value = ""; $("top10").value = ""; $("rest").value = "";
+  $("round").textContent = "";
+  setMsg($("find-msg"), "");
+  $("candidates").innerHTML = "";
+  $("clue-rows").innerHTML = "";
+  while ($("clue-rows").children.length < 2) addClueRow();
+  $("clue-box").open = false;
+  $("sec-answer").hidden = true;
+  $("sec-hint").hidden = true;
+  $("answer").hidden = true; $("answer").textContent = "";
+  $("hints").innerHTML = ""; $("my-word").textContent = ""; setMsg($("hint-msg"), "");
+  $("word").value = ""; $("sim").value = "";
+  renderHistory();
+  $("paste").focus();
+}
+$("reset-btn").addEventListener("click", () => {
+  if (confirm("세 숫자, 단서, 입력 기록을 모두 지우고 처음부터 시작할까요?")) resetAll();
 });
 
 // ---- 시작: 저장된 상태 복원 ----

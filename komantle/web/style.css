@@ -39,3 +39,4 @@ footer { max-width:720px; margin:0 auto; padding:16px; color:var(--muted); font-
 .clues .row { margin-top:6px; }
 .clues .row label { flex:1 1 100px; }
 .clues .row button { flex:0 0 auto; }
+.actions { justify-content: space-between; align-items: center; }
