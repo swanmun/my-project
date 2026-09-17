@@ -49,7 +49,7 @@
     <!-- 3. 힌트 받기 -->
     <section class="card" id="sec-hint" hidden>
       <h2>3. 힌트 받기</h2>
-      <p class="help" id="hint-help">꼬맨틀에 입력한 단어를 적으면, 그보다 조금 더 유사한 단어를 알려줍니다.</p>
+      <p class="help" id="hint-help">꼬맨틀에 입력한 단어를 적으면, 그보다 순위가 높은 단어를 알려줍니다. 조금 = 내 순위의 3/4 지점, 보통 = 절반, 많이 = 1/5 지점.</p>
       <form id="hint-form">
         <div class="row">
           <label class="grow">단어 <input id="word" type="text" autocomplete="off" required /></label>
@@ -58,9 +58,9 @@
         <p id="sim-help" class="msg" hidden>이웃 목록에 없는 단어입니다. 꼬맨틀에 나온 유사도를 입력해주세요.</p>
         <div class="row">
           <fieldset class="steps">
-            <label><input type="radio" name="step" value="2" /> 조금 (+2)</label>
-            <label><input type="radio" name="step" value="5" checked /> 보통 (+5)</label>
-            <label><input type="radio" name="step" value="10" /> 많이 (+10)</label>
+            <label><input type="radio" name="step" value="0.75" /> 조금</label>
+            <label><input type="radio" name="step" value="0.5" checked /> 보통</label>
+            <label><input type="radio" name="step" value="0.2" /> 많이</label>
           </fieldset>
           <button type="submit">힌트</button>
         </div>

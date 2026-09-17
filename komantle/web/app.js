@@ -30,7 +30,7 @@ function renderStatus() {
     ? "스포일러입니다. 버튼을 눌러야 보입니다."
     : "세 숫자가 사이트와 정확히 맞지 않아 정답을 확정할 수 없습니다. 아래 힌트 받기에 꼬맨틀에 친 단어와 유사도를 2개 넣으면 확정됩니다.";
   $("hint-help").textContent = state.confirmed
-    ? "꼬맨틀에 입력한 단어를 적으면, 그보다 조금 더 유사한 단어를 알려줍니다."
+    ? "꼬맨틀에 입력한 단어를 적으면, 그보다 순위가 높은 단어를 알려줍니다. 조금 = 내 순위의 3/4 지점, 보통 = 절반, 많이 = 1/5 지점."
     : "정답이 미확정이라 힌트는 아직 나오지 않습니다. 꼬맨틀에 친 단어와 그때 나온 유사도를 넣어 주세요. 넣는 단어마다 자동으로 단서로 쓰여 정답을 좁힙니다.";
   updateSimField();
 }
@@ -226,7 +226,7 @@ $("hint-form").addEventListener("submit", async (e) => {
   } else {
     const exclude = new Set(state.history.map((h) => h.word));
     // 결과 표시 직전에 정답을 한 번 더 걸러낸다
-    const list = hints(data.n, sim, step, 5, exclude, data.a).filter((h) => h.word !== data.a);
+    const list = hints(data.n, sim, step, 5, exclude, data.a, found ? found.rank : null).filter((h) => h.word !== data.a);
     setMsg($("hint-msg"), list.length ? "" : "더 보여줄 힌트가 없습니다.");
     for (const h of list) {
       const li = document.createElement("li");

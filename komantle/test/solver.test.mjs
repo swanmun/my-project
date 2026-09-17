@@ -40,13 +40,25 @@ test("힌트: 정답 없음, exclude 반영, 전부 guessSim보다 높음", () =
   const { a: answer, n: neighbors } = JSON.parse(readFileSync(new URL("n/1630.json", DATA), "utf8"));
   const guessSim = 30;
   const exclude = new Set([neighbors[50][0], neighbors[60][0]]);
-  const h = hints(neighbors, guessSim, 5, 5, exclude, answer);
+  const h = hints(neighbors, guessSim, 0.5, 5, exclude, answer);
   assert.equal(h.length, 5);
   for (const x of h) {
     assert.ok(x.sim > guessSim);
     assert.ok(!exclude.has(x.word));
     assert.notEqual(x.word, answer);
   }
+  // 순위 기준: 100위 단어 → 조금 75위, 보통 50위, 많이 20위 근처. 세 단계가 서로 다르다
+  const [w100, s100] = neighbors[99];
+  const little = hints(neighbors, s100, 0.75, 5, new Set(), answer, 100).map((x) => x.rank);
+  const normal = hints(neighbors, s100, 0.5, 5, new Set(), answer, 100).map((x) => x.rank);
+  const much = hints(neighbors, s100, 0.2, 5, new Set(), answer, 100).map((x) => x.rank);
+  assert.ok(little.every((r) => r >= 73 && r <= 77), `조금 ${little}`);
+  assert.ok(normal.every((r) => r >= 48 && r <= 52), `보통 ${normal}`);
+  assert.ok(much.every((r) => r >= 18 && r <= 22), `많이 ${much}`);
+  // 목록 밖(1,000위 밖) 단어: 1001위 기준 → 많이 = 200위 근처
+  const out = hints(neighbors, 10, 0.2, 5, new Set(), answer, null).map((x) => x.rank);
+  assert.ok(out.every((r) => r >= 198 && r <= 202), `목록 밖 많이 ${out}`);
+  assert.ok(w100.length > 0);
   // 이웃 목록에 정답 자신이 없는지
   assert.equal(findNeighbor(neighbors, answer), null);
   // 이웃 목록 단어는 자동으로 유사도를 찾는다
@@ -54,7 +66,7 @@ test("힌트: 정답 없음, exclude 반영, 전부 guessSim보다 높음", () =
   assert.equal(f.rank, 10);
   assert.equal(f.sim, neighbors[9][1]);
   // 1위 이상이면 힌트 없음
-  assert.equal(hints(neighbors, neighbors[0][1], 2, 5, new Set(), answer).length, 0);
+  assert.equal(hints(neighbors, neighbors[0][1], 0.75, 5, new Set(), answer, 1).length, 0);
 });
 
 // ---- 단서(단어 + 유사도) 매칭: 단어 벡터로 어떤 단어든 대조 ----

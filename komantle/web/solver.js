@@ -121,16 +121,22 @@ export function parseKomantleText(text) {
   };
 }
 
-/** 이웃 목록에서 guessSim보다 조금 더 높은 단어 n개를 고른다. 정답은 항상 제외. */
-export function hints(neighbors, guessSim, step, n = 5, exclude = new Set(), answer = null) {
-  const target = guessSim + step;
+/**
+ * 순위 기준 힌트. 내 단어의 순위(rank, 목록 밖이면 neighbors.length+1)에 factor를 곱한 지점 근처의 단어 n개.
+ * factor: 조금 0.75, 보통 0.5, 많이 0.2. 결과는 전부 guessSim보다 높고 정답은 항상 제외.
+ */
+export function hints(neighbors, guessSim, factor, n = 5, exclude = new Set(), answer = null, rank = null) {
+  const r = rank ?? neighbors.length + 1;
+  const target = Math.max(1, Math.round(r * factor));
   return neighbors
     .map(([word, sim], i) => ({ word, sim, rank: i + 1 }))
-    .filter((h) => h.sim > guessSim && !exclude.has(h.word) && h.word !== answer)
-    .sort((x, y) => Math.abs(x.sim - target) - Math.abs(y.sim - target))
+    .filter((h) => h.sim > guessSim && h.rank < r && !exclude.has(h.word) && h.word !== answer)
+    .sort((x, y) => Math.abs(x.rank - target) - Math.abs(y.rank - target))
     .slice(0, n)
     .sort((x, y) => y.sim - x.sim);
 }
+
+export const HINT_STEPS = { little: 0.75, normal: 0.5, much: 0.2 };
 
 /** 이웃 목록에서 단어를 찾는다. 없으면 null. */
 export function findNeighbor(neighbors, word) {
