@@ -12,4 +12,5 @@ export const navItems = [
   { href: "/map", label: "지도" },
   { href: "/mypage", label: "마이페이지" },
   { href: komantleSolverUrl, label: "꼬맨틀 솔버" },
+  { href: "/garden", label: "정원" },
 ];

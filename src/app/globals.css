@@ -17,3 +17,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
+
+/* 정원(/garden) 장식 */
+@keyframes twinkle { 0%,100% { opacity:.25; } 50% { opacity:1; } }
+.animate-twinkle { animation: twinkle 2.6s ease-in-out infinite; }
+@keyframes pollen { 0% { transform: translate(0,0); } 25% { transform: translate(3vw,-6vh); } 50% { transform: translate(-2vw,-12vh); } 75% { transform: translate(4vw,-18vh); } 100% { transform: translate(0,-24vh); } }
+.animate-pollen { animation: pollen 20s linear infinite; }
