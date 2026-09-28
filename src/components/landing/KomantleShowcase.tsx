@@ -1,5 +1,6 @@
 import { CornerFrame, Halftone, NoteColumn, Page, Tag, Window } from "@/components/ds";
-import { komantleSolverUrl } from "@/lib/site";
+import Image from "next/image";
+import { komantleOriginalUrl, komantleSolverUrl } from "@/lib/site";
 
 // 랜딩 작품 1: 꼬맨틀 솔버. Halftone "Field" 섹션(핑크 단색 바탕 + OS 창 데모)
 function SolverField() {
@@ -68,6 +69,28 @@ function SolverField() {
 export default function KomantleShowcase() {
   return (
     <Page bg="var(--surface-field)" fg="var(--fg-on-field)" style={{ paddingBottom: "var(--section-pad)" }}>
+      {/* 원본 꼬맨틀이 무엇인지 먼저 보여줌: 실제 화면 캡처 + 솔버가 읽는 세 숫자 */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "var(--column-gap)", alignItems: "center", paddingTop: 48 }}>
+        <Window title="semantle-ko.newsjel.ly · 꼬맨틀 원본" tone="white" padding={0} className="ht-field-win">
+          <a href={komantleOriginalUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", textDecoration: "none" }}>
+            <Image src="/komantle-original.png" alt="꼬맨틀 원본 화면: 정답 단어와 가장 유사한 단어의 유사도, 10번째, 1,000번째 유사도가 적힌 첫 화면" width={640} height={370} style={{ display: "block", width: "100%", height: "auto" }} />
+          </a>
+        </Window>
+        <div>
+          <Tag>What Is 꼬맨틀</Tag>
+          <p style={{ fontSize: 22, lineHeight: 1.3, letterSpacing: "-0.02em", marginTop: 16, textWrap: "pretty" }}>
+            꼬맨틀은 뉴스젤리가 만든 한국어 단어 유사도 추측 게임입니다. 매일 정답 단어 하나가 정해지고, 추측한 단어가 정답과 얼마나 가까운지 유사도 점수로만 알려줍니다.
+          </p>
+          <p style={{ fontSize: 17, lineHeight: 1.35, letterSpacing: "-0.015em", marginTop: 16 }}>
+            첫 화면에 적힌 세 숫자(가장 유사한 단어, 10번째, 1,000번째의 유사도)가 이 솔버가 읽는 전부입니다. 원본은{" "}
+            <a href={komantleOriginalUrl} target="_blank" rel="noopener noreferrer">
+              semantle-ko.newsjel.ly
+            </a>
+            에서 직접 해볼 수 있습니다.
+          </p>
+        </div>
+      </div>
+
       <SolverField />
 
       <CornerFrame padding="24px 0" style={{ marginTop: 48 }}>

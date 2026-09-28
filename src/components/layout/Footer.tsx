@@ -12,7 +12,6 @@ export default function Footer() {
         <span style={{ display: "flex", gap: 16 }}>
           <a href="https://github.com/swanmun/my-project">GitHub</a>
         </span>
-        <span>Made in Seoul</span>
       </div>
     </footer>
   );
