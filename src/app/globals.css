@@ -1,21 +1,14 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "../styles/halftone.css"; /* Halftone 디자인 시스템 토큰 (.claude/skills/halftone-design 참고) */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --color-ink: var(--ink-900);
+  --color-cocoa: var(--cocoa-800);
+  --color-pink: var(--pink-500);
+  --color-sage: var(--sage-400);
+  --color-magenta: var(--magenta-500);
+  --color-sky: var(--sky-100);
+  --font-sans: var(--font-sans);
 }
 
 /* 정원(/garden) 장식 */

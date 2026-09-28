@@ -1,0 +1,98 @@
+/* Halftone Design System 토큰
+   출처: claude.ai/design "Halftone Design System" (tokens/*.css 를 그대로 옮김)
+   규칙 요약은 .claude/skills/halftone-design/README.md 참고 */
+
+:root {
+  /* 색 */
+  --pink-500: #f3869f; --pink-300: #f8b6c6; --pink-100: #fce3ea;
+  --magenta-500: #f65fd8; --magenta-300: #fba8ec;
+  --sky-100: #d6ecfd;
+  --sage-400: #abb9b9; --sage-200: #d3dbdb;
+  --teal-500: #0fb0a2;
+  --ink-900: #1e1e1e; --cocoa-800: #3c2d30; --cocoa-600: #5e4a4e;
+  --gray-400: #9a9a9a; --gray-300: #c4c4c4; --gray-200: #d9d9d9; --gray-100: #efefef; --white: #ffffff;
+  --signal-blue: #3d6bd6; --signal-rust: #a8452e; --signal-green: #3e9a4b;
+  --surface-page: var(--white); --surface-field: var(--pink-500); --surface-quiet: var(--sage-400); --surface-night: var(--ink-900);
+  --surface-window: var(--gray-200); --surface-window-inner: var(--white); --surface-inset: var(--gray-300);
+  --fg-1: var(--ink-900); --fg-2: #4a4a4a; --fg-on-field: var(--cocoa-800); --fg-on-field-2: var(--cocoa-600); --fg-inverse: var(--white); --fg-inverse-2: #bdbdbd;
+  --rule: var(--ink-900); --rule-on-field: var(--cocoa-800); --rule-inverse: var(--white);
+  --titlebar-bg: var(--ink-900); --titlebar-fg: var(--white);
+  --accent: var(--magenta-500); --focus: var(--ink-900);
+  --link: var(--ink-900); --link-hover: var(--cocoa-600);
+
+  /* 글자 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif;
+  --text-display-1: 128px; --text-display-2: 96px; --text-h1: 64px; --text-h2: 44px; --text-h3: 28px;
+  --text-body-lg: 22px; --text-body: 17px; --text-small: 14px; --text-label: 11px; --text-micro: 9px;
+  --leading-display: 0.88; --leading-heading: 0.98; --leading-body: 1.2; --leading-label: 1.3;
+  --tracking-display: -0.055em; --tracking-heading: -0.04em; --tracking-body: -0.015em; --tracking-label: 0.04em;
+
+  /* 간격 */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px; --space-10: 128px;
+  --page-max: 1240px; --page-gutter: 24px; --column-gap: 40px; --section-pad: 128px;
+  --nav-h: 36px; --titlebar-h: 20px;
+
+  /* 효과: 모서리 0, 그림자 없음, 1px 잉크 선과 OS 베벨만 */
+  --radius-0: 0;
+  --border-hair: 1px solid var(--rule); --border-hair-dash: 1px dashed var(--rule);
+  --bevel-out: inset 1px 1px 0 var(--white), inset -1px -1px 0 var(--gray-400);
+  --bevel-in: inset 1px 1px 0 var(--gray-400), inset -1px -1px 0 var(--white);
+  --window-frame: 0 0 0 1px var(--ink-900);
+  --dot-grid: radial-gradient(currentColor 0.8px, transparent 1px) 0 0 / 6px 6px;
+  --dot-grid-fine: radial-gradient(currentColor 0.6px, transparent 0.8px) 0 0 / 3px 3px;
+  --ease-step: steps(4, end); --ease-snap: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 80ms; --dur-base: 160ms;
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--fg-1);
+    background: var(--surface-page);
+    letter-spacing: var(--tracking-body);
+  }
+  a { color: inherit; text-decoration: underline; text-underline-offset: 0.12em; text-decoration-thickness: 0.06em; }
+  a:hover { opacity: 0.7; }
+  ::selection { background: var(--ink-900); color: var(--white); }
+}
+
+@layer components {
+/* 칩 버튼: 흰 바탕, 올리면 잉크로 반전. 누르면 1px 내려감 */
+.ht-chip {
+  font-family: var(--font-sans); font-weight: 500; font-size: 15px; letter-spacing: -0.02em;
+  height: 28px; padding: 0 7px; border: 0; border-radius: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  background: var(--white); color: var(--ink-900); text-decoration: none; transition: none;
+}
+.ht-chip:hover { background: var(--ink-900); color: var(--white); opacity: 1; }
+.ht-chip:active { transform: translateY(1px); }
+.ht-chip--solid { background: var(--ink-900); color: var(--white); }
+.ht-chip--solid:hover { background: var(--cocoa-800); }
+
+/* 링크형 큰 CTA: 밑줄 굵게 */
+.ht-link {
+  background: transparent; border: 0; padding: 0; cursor: pointer; color: inherit;
+  font-family: var(--font-sans); font-weight: 600; letter-spacing: -0.05em; line-height: 1;
+  text-decoration: underline; text-underline-offset: 0.14em;
+}
+.ht-link--md { font-size: 36px; text-decoration-thickness: 2px; }
+.ht-link--lg { font-size: 64px; text-decoration-thickness: 4px; }
+.ht-link:hover { opacity: 0.7; }
+.ht-link:active { transform: translateY(1px); }
+
+/* 디스플레이 제목 */
+.ht-display { margin: 0; font-weight: 600; line-height: 0.88; letter-spacing: -0.055em; text-wrap: balance; }
+.ht-h2 { margin: 0; font-weight: 600; line-height: 1; letter-spacing: -0.05em; }
+.ht-label { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+
+  /* 한글 제목은 단어 중간에서 줄바꿈하지 않음 */
+  .ht-display, .ht-h2 { word-break: keep-all; }
+  .ht-nowrap { white-space: nowrap; }
+
+  /* 데모 필드: 좁은 화면에서는 창을 세로로 쌓음 */
+  @media (max-width: 640px) {
+    .ht-field { min-height: auto !important; display: flex; flex-direction: column; gap: 12px; padding: 32px 8px 8px; }
+    .ht-field .ht-field-win { position: relative !important; inset: auto !important; width: auto !important; }
+  }
+}
