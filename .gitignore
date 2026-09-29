@@ -52,3 +52,4 @@ komantle/.wrangler/
 # 원본 데이터 압축본 (용량 큼)
 komantle/semantle-ko.zip
 komantle/data/
+__pycache__/
