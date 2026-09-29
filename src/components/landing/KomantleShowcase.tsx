@@ -42,7 +42,18 @@ function SolverField() {
 
       <Window className="ht-field-win" title="3. 힌트 받기" tone="white" width="min(360px, 80%)" style={{ position: "absolute", left: "30%", top: 220 }} padding={8}>
         <div style={{ fontSize: 13 }}>
-          바위: 유사도 <b style={{ fontVariantNumeric: "tabular-nums" }}>38.12</b> (약 100위) · 보통
+          바위: 유사도 <b style={{ fontVariantNumeric: "tabular-nums" }}>38.12</b> (약 100위)
+        </div>
+        {/* 실제 솔버의 순위 막대: 1,000위(왼쪽) → 1위(오른쪽), 흰 네모 = 내 단어, 마젠타 = 목표 순위 */}
+        <div aria-hidden style={{ position: "relative", height: 14, marginTop: 8 }}>
+          <div style={{ position: "absolute", left: 0, right: 0, top: 4, height: 6, background: "var(--gray-200)", boxShadow: "inset 0 0 0 1px var(--ink-900)" }} />
+          <span style={{ position: "absolute", left: "33%", top: 7, width: 10, height: 10, transform: "translate(-50%,-50%)", background: "var(--white)", boxShadow: "0 0 0 1px var(--ink-900)" }} />
+          <span style={{ position: "absolute", left: "43%", top: 7, width: 12, height: 12, transform: "translate(-50%,-50%)", background: "var(--magenta-500)", boxShadow: "0 0 0 1px var(--ink-900)" }} />
+        </div>
+        <div className="ht-label" style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+          <span>1,000위</span>
+          <span>목표 약 50위 · 5개</span>
+          <span>1위</span>
         </div>
         <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
           {[
@@ -100,8 +111,8 @@ export default function KomantleShowcase() {
       </CornerFrame>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "var(--column-gap)", marginTop: 64 }}>
-        <NoteColumn label="Three Numbers">꼬맨틀 첫 화면의 문장을 그대로 붙여넣으면 1위·10위·1,000위 유사도를 자동으로 읽고, 4,650개 후보의 지문과 대조해 정답을 특정합니다.</NoteColumn>
-        <NoteColumn label="Not A Spoiler">정답은 버튼 뒤에 숨깁니다. 대신 내가 친 단어보다 한 걸음 더 가까운 단어만 건넵니다. 조금·보통·많이, 원하는 만큼만.</NoteColumn>
+        <NoteColumn label="Three Numbers">꼬맨틀 첫 화면의 문장을 복사해 붙여넣기만 하면 회차와 세 숫자를 읽고, 4,650개 후보의 지문과 대조해 바로 정답을 특정합니다.</NoteColumn>
+        <NoteColumn label="Not A Spoiler">정답은 버튼 뒤에 숨깁니다. 대신 내가 친 단어보다 가까운 단어만 건넵니다. 막대를 끌어 몇 위 근처에서 몇 개를 받을지 정하고, 1~10위는 잠가 둡니다.</NoteColumn>
         <NoteColumn label="No Server">서버도 외부 요청도 없이 브라우저 안에서만 계산합니다. 어휘 59,118개의 단어 벡터를 정적 파일로 배포합니다.</NoteColumn>
       </div>
 

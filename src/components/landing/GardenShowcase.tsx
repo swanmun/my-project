@@ -53,6 +53,7 @@ export default function GardenShowcase() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 24, marginTop: 32 }}>
             <NoteColumn size="sm" label="Bloom">버튼이나 화면을 누르면 매번 다른 파스텔 꽃.</NoteColumn>
             <NoteColumn size="sm" label="Wind / Night">바람에 흔들리고, 밤에는 빛납니다.</NoteColumn>
+            <NoteColumn size="sm" label="Clear">지우면 꽃잎이 흩날리며 사라집니다.</NoteColumn>
           </div>
           <div style={{ marginTop: 48 }}>
             <Link href="/garden" className="ht-link ht-link--md">
