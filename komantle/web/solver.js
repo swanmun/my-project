@@ -3,7 +3,13 @@
 
 export const DATA_BASE = "./komantle-data";
 
-/** 세 숫자(1위, 10위, 1000위)로 정답 후보 인덱스를 찾는다. rest는 선택. */
+/**
+ * 세 숫자(1위, 10위, 1000위)로 정답 후보 인덱스를 찾는다. rest는 선택.
+ * - 1위·10위가 tol(사이트 반올림 0.005 + 여유) 안이면 일치.
+ * - 1000위는 판정에 쓰지 않는다. 사이트 어휘가 우리와 조금 달라 1000위 근처 순위가 밀리면
+ *   값이 양쪽으로 0.1까지 흔들린다(1630회차: 사이트 29.64 / 로컬 29.54, 1642회차: 21.86 / 21.87).
+ *   대신 1위·10위가 같은 후보가 여럿일 때(4,650개 중 60개만 해당) 1000위가 가까운 순으로 정렬한다.
+ */
 export function matchFingerprint(fp, top, top10, rest, tol = 0.006) {
   const exact = [];
   let best = -1;
@@ -12,14 +18,14 @@ export function matchFingerprint(fp, top, top10, rest, tol = 0.006) {
   for (let i = 0; i < fp.length / 3; i++) {
     const a = fp[i * 3];
     const b = fp[i * 3 + 1];
-    const c = fp[i * 3 + 2];
     const err = Math.max(Math.abs(a - top), Math.abs(b - top10));
-    if (err <= tol && (!hasRest || rest >= c - tol)) exact.push(i);
+    if (err <= tol) exact.push(i);
     if (err < bestErr) {
       bestErr = err;
       best = i;
     }
   }
+  if (exact.length > 1 && hasRest) exact.sort((i, j) => Math.abs(fp[i * 3 + 2] - rest) - Math.abs(fp[j * 3 + 2] - rest));
   return exact.length
     ? { candidates: exact, approx: false }
     : { candidates: [best], approx: true };

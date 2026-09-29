@@ -19,6 +19,18 @@ test("1000위 빈값이어도 1630", () => {
   assert.deepEqual(r, { candidates: [1630], approx: false });
 });
 
+test("(47.82, 38.03, 21.86) → 1642회차: 1000위가 로컬(21.87)과 달라도 정확 일치", () => {
+  const r = matchFingerprint(fp, 47.82, 38.03, 21.86);
+  assert.equal(r.approx, false);
+  assert.equal(r.candidates.length, 1);
+  assert.ok(Math.abs(fp[r.candidates[0] * 3 + 2] - 21.87) < 0.01);
+});
+
+test("1000위가 0.1 어긋난 1630(로컬 29.54)도 정확 일치", () => {
+  const r = matchFingerprint(fp, 52.97, 45.92, 29.64);
+  assert.deepEqual(r, { candidates: [1630], approx: false });
+});
+
 test("엉뚱한 값은 approx=true, 후보 1개", () => {
   const r = matchFingerprint(fp, 99, 98, null);
   assert.equal(r.approx, true);
