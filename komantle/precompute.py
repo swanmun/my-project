@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 
-DATA_DIR = Path(r"C:\Users\mmm\Downloads\semantle-ko\semantle-ko\data")
+DATA_DIR = Path(__file__).parent / "data"  # secrets.txt, valid_nearest.pkl 을 여기에 둔다
 K = 1000       # 상위 몇 개 이웃을 저장할지 (사이트와 동일하게 1000)
 CHUNK = 128    # 한 번에 계산할 후보 수. 메모리 부족하면 줄이기
 
