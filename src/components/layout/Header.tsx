@@ -34,12 +34,7 @@ export default function Header() {
           </Link>
         ))}
       </div>
-      <div style={{ display: "flex", gap: 3, justifyContent: "flex-end", pointerEvents: "auto" }}>
-        {/* TODO: 로그인 상태에 따라 로그인/로그아웃 전환 */}
-        <Link href="/login" className="ht-chip ht-chip--solid">
-          로그인
-        </Link>
-      </div>
+      <div />
     </nav>
   );
 }
