@@ -1,45 +1,96 @@
-:root { --bg:#f6f7f9; --card:#fff; --line:#e3e5e8; --text:#1c1f24; --muted:#6b7280; --accent:#1f6feb; --warn:#b45309; --ok:#15803d; }
+/* 꼬맨틀 솔버 — Halftone 디자인 시스템 (메인 사이트와 같은 언어)
+   흰 바탕, OS 창(잉크 타이틀바 + 1px 프레임), 모서리 0, 그림자 없음, Pretendard */
+:root {
+  --ink: #1e1e1e; --cocoa: #3c2d30; --fg-2: #4a4a4a; --gray-400: #9a9a9a; --gray-300: #c4c4c4; --gray-200: #d9d9d9; --gray-100: #efefef;
+  --white: #fff; --magenta: #f65fd8; --pink-100: #fce3ea; --sage-200: #d3dbdb; --signal-green: #3e9a4b; --signal-rust: #a8452e;
+  --bevel-in: inset 1px 1px 0 var(--gray-400), inset -1px -1px 0 var(--white);
+  --frame: 0 0 0 1px var(--ink);
+  --font: "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", system-ui, sans-serif;
+}
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height:1.5; }
-.top { padding:24px 16px 8px; max-width:720px; margin:0 auto; }
-.top h1 { margin:0; font-size:1.5rem; }
-.sub, .muted, .help { color:var(--muted); font-size:.9rem; margin:4px 0 0; }
-main { max-width:720px; margin:0 auto; padding:0 16px 32px; display:grid; gap:16px; }
-.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
-.card h2 { margin:0 0 4px; font-size:1.1rem; }
-.card h3 { margin:20px 0 8px; font-size:1rem; }
-textarea, input[type=text], input[type=number] { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
-textarea { margin:8px 0; resize:vertical; }
-.row { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; margin-top:8px; }
-.row label { display:flex; flex-direction:column; font-size:.85rem; gap:2px; flex:1 1 120px; }
-.row label.grow { flex:2 1 160px; }
-.opt { color:var(--muted); }
-button { padding:9px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; font:inherit; cursor:pointer; }
-button:disabled { opacity:.5; cursor:default; }
-button.link { background:none; color:var(--muted); padding:4px 0; text-decoration:underline; }
-.steps { display:flex; gap:12px; border:0; padding:0; margin:0; flex:1 1 auto; }
-.steps label { flex:0 0 auto; flex-direction:row; align-items:center; gap:4px; }
-.msg { margin:8px 0 0; font-size:.9rem; color:var(--warn); min-height:1em; }
-.msg.ok { color:var(--ok); }
-.cands { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-.cands button { background:#fff; color:var(--text); border:1px solid var(--line); }
-.answer { font-size:1.6rem; font-weight:700; margin:12px 0 0; }
-.mine { margin-top:12px; font-weight:600; }
-.hints { list-style:none; padding:0; margin:8px 0 0; display:flex; flex-wrap:wrap; gap:8px; }
-.hints button { background:#eef4ff; color:var(--accent); border:1px solid #c7d7f5; }
-.hints small { color:var(--muted); font-weight:400; margin-left:4px; }
-table { width:100%; border-collapse:collapse; font-size:.9rem; }
-th, td { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); }
-th { color:var(--muted); font-weight:500; }
-tr.answer-row td { color:var(--ok); font-weight:700; }
-footer { max-width:720px; margin:0 auto; padding:16px; color:var(--muted); font-size:.8rem; }
-.clues { margin-top:10px; border:1px dashed var(--line); border-radius:8px; padding:8px 12px; }
-.clues summary { cursor:pointer; font-size:.9rem; }
-.clues .row { margin-top:6px; }
-.clues .row label { flex:1 1 100px; }
-.clues .row button { flex:0 0 auto; }
-.actions { justify-content: space-between; align-items: center; }
-.badge { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:999px; font-size:.75rem; font-weight:600; vertical-align:middle; }
-.badge.ok { background:#dcfce7; color:var(--ok); }
-.badge.warn { background:#fef3c7; color:var(--warn); }
+body { margin: 0; background: var(--white); color: var(--ink); font-family: var(--font); line-height: 1.35; letter-spacing: -0.015em; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: underline; text-underline-offset: .12em; }
+a:hover { opacity: .7; }
+::selection { background: var(--ink); color: var(--white); }
+
+/* 머리 */
+.top { padding: 32px 16px 12px; max-width: 720px; margin: 0 auto; }
+.top h1 { margin: 0; font-size: 44px; font-weight: 600; line-height: .98; letter-spacing: -0.04em; word-break: keep-all; }
+.top h1::before { content: "KOMANTLE.SOLVER"; display: inline-block; background: var(--ink); color: var(--white); font-size: 12px; font-weight: 500; letter-spacing: 0; height: 18px; line-height: 18px; padding: 0 4px; margin-bottom: 12px; vertical-align: top; }
+.top h1::before { display: block; width: max-content; }
+.sub, .muted, .help { color: var(--fg-2); font-size: 14px; margin: 6px 0 0; }
+.muted { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+
+main { max-width: 720px; margin: 0 auto; padding: 0 16px 40px; display: grid; gap: 24px; }
+
+/* 카드 = OS 창 */
+.card { background: var(--white); box-shadow: var(--frame); padding: 0 12px 12px; }
+.card > h2 { margin: 0 -12px 12px; height: 20px; line-height: 20px; background: var(--ink); color: var(--white); font-size: 13px; font-weight: 500; letter-spacing: 0; padding: 0 6px; white-space: nowrap; overflow: hidden; display: flex; align-items: center; gap: 8px; }
+.card h3 { margin: 24px 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+#sec-answer { background: var(--gray-200); }
+#sec-answer > :not(h2) { position: relative; }
+
+/* 입력 */
+textarea, input[type=text], input[type=number] { width: 100%; padding: 7px 8px; border: 0; box-shadow: inset 0 0 0 1px var(--ink); border-radius: 0; background: var(--white); font: inherit; font-size: 15px; font-variant-numeric: tabular-nums; }
+textarea:focus, input:focus { outline: 2px solid var(--ink); outline-offset: -1px; }
+textarea { margin: 8px 0 0; resize: vertical; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: 10px; }
+.row label { display: flex; flex-direction: column; font-size: 11px; font-weight: 600; letter-spacing: .02em; gap: 3px; flex: 1 1 120px; }
+.row label.grow { flex: 2 1 160px; }
+.opt { color: var(--fg-2); font-weight: 400; letter-spacing: 0; }
+
+/* 버튼: 잉크 칩 (주요), 흰 칩 (보조, 올리면 반전), 링크 */
+button { height: 28px; padding: 0 10px; border: 0; border-radius: 0; background: var(--ink); color: var(--white); font: inherit; font-size: 15px; font-weight: 500; letter-spacing: -0.02em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: none; }
+button:hover { background: var(--cocoa); }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: .4; cursor: default; transform: none; }
+button.link { background: none; color: var(--fg-2); height: auto; padding: 0; font-size: 13px; text-decoration: underline; text-underline-offset: .12em; }
+button.link:hover { color: var(--ink); background: none; }
+.cands button, .hints button { background: var(--white); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.cands button:hover, .hints button:hover { background: var(--ink); color: var(--white); }
+.hints button:hover small { color: var(--gray-300); }
+
+.steps { display: flex; gap: 12px; border: 0; padding: 0; margin: 0; flex: 1 1 auto; }
+.steps label { flex: 0 0 auto; flex-direction: row; align-items: center; gap: 4px; font-size: 14px; font-weight: 400; letter-spacing: -0.015em; }
+.steps input { accent-color: var(--ink); }
+
+.msg { margin: 8px 0 0; font-size: 13px; color: var(--signal-rust); min-height: 1em; }
+.msg.ok { color: var(--signal-green); }
+.cands { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* 정답 */
+.answer { font-size: 44px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; margin: 12px 0 0; }
+.mine { margin-top: 12px; font-size: 14px; font-weight: 500; }
+.hints { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.hints small { color: var(--fg-2); font-weight: 400; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* 표: 1px 헤어라인 */
+table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 5px 4px; border-bottom: 1px solid var(--ink); }
+th { font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+tr.answer-row td { background: var(--magenta); font-weight: 600; }
+
+footer { max-width: 720px; margin: 0 auto; padding: 16px; color: var(--fg-2); font-size: 11px; font-weight: 600; letter-spacing: .02em; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer::before { content: "∵ ×"; } footer::after { content: "× ∵"; }
+
+/* 단어 단서: 점선 헤어라인 (접힘) → 실선 (펼침) */
+.clues { margin-top: 12px; border: 1px dashed var(--ink); padding: 8px 10px; }
+.clues[open] { border-style: solid; }
+.clues summary { cursor: pointer; font-size: 14px; font-weight: 500; list-style: none; }
+.clues summary::before { content: "+ "; font-weight: 600; }
+.clues[open] summary::before { content: "− "; }
+.clues .row { margin-top: 6px; }
+.clues .row label { flex: 1 1 100px; }
+.clues .row button { flex: 0 0 auto; }
+.actions { justify-content: space-between; align-items: center; margin-top: 12px; }
+
+/* 상태 태그 */
+.badge { display: inline-flex; align-items: center; height: 14px; padding: 0 4px; font-size: 11px; font-weight: 500; letter-spacing: 0; margin-left: auto; }
+.badge.ok { background: var(--magenta); color: var(--ink); }
+.badge.warn { background: var(--white); color: var(--ink); }
+
+@media (max-width: 480px) {
+  .top h1 { font-size: 32px; }
+  .answer { font-size: 32px; }
+}
