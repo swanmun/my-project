@@ -75,6 +75,6 @@ src/
 └─ lib/site.ts               # 사이트명, 메뉴, 솔버·꼬맨틀 원본 주소
 komantle/                    # 꼬맨틀 솔버 (자세한 내용은 komantle/README.md)
 public/komantle-original.png # 소개 페이지에 넣은 꼬맨틀 원본 화면 캡처 (출처: 뉴스젤리)
-docs/솔버-원리.md            # 솔버 원리와 한계 (발표용)
+docs/솔버-원리.md            # 솔버 원리와 한계
 .claude/skills/halftone-design/   # 디자인 규칙 (UI 작업 전 읽기)
 ```
