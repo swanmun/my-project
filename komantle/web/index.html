@@ -18,8 +18,29 @@
     <!-- 1. 세 숫자 입력 -->
     <section class="card" id="sec-find">
       <h2>1. 세 숫자 입력</h2>
-      <p class="help">꼬맨틀 첫 화면 상단 문장의 숫자를 그대로 입력하세요. 문장 전체를 붙여넣어도 됩니다.</p>
-      <textarea id="paste" rows="2" placeholder="예) 정답 단어와 가장 유사한 단어의 유사도는 52.97 입니다. 10번째로 … 45.92이고, 1,000번째로 … 29.64 입니다."></textarea>
+      <ol class="steps-guide">
+        <li><span class="no">1</span><a class="btn" href="https://semantle-ko.newsjel.ly/" target="_blank" rel="noopener noreferrer">꼬맨틀 열기 ↗</a></li>
+        <li><span class="no">2</span>맨 위 문장을 드래그해서 복사</li>
+        <li><span class="no">3</span>돌아와서 아래에 붙여넣기</li>
+      </ol>
+      <figure class="guide" aria-label="꼬맨틀 첫 화면에서 복사할 위치">
+        <div class="mock">
+          <div class="mock-title">꼬맨틀 - 단어 유사도 추측 게임</div>
+          <p class="mock-line">N번째 꼬맨틀의 정답 단어를 맞혀보세요.</p>
+          <div class="mock-hl">
+            <p class="mock-line">정답 단어와 가장 유사한 단어의 유사도는 <b class="blank">1위</b> 입니다.</p>
+            <p class="mock-line">10번째로 유사한 단어의 유사도는 <b class="blank">10위</b>이고, 1,000번째로 유사한 단어의 유사도는 <b class="blank">1,000위</b> 입니다.</p>
+            <span class="mock-tag">이 부분을 복사</span>
+          </div>
+          <div class="mock-input">추측할 단어를 입력하세요</div>
+        </div>
+        <figcaption>숫자는 매일 바뀝니다. 강조된 문장을 통째로 복사하거나, 숫자 세 개만 적어도 됩니다.</figcaption>
+      </figure>
+      <div class="paste-row">
+        <textarea id="paste" rows="2" placeholder="예) 정답 단어와 가장 유사한 단어의 유사도는 52.97 입니다. 10번째로 … 45.92이고, 1,000번째로 … 29.64 입니다."></textarea>
+        <button type="button" id="paste-btn" title="클립보드 내용을 붙여넣습니다">붙여넣기</button>
+      </div>
+      <p id="paste-msg" class="msg"></p>
       <form id="find-form" class="row">
         <label>1위 <input id="top" type="number" step="0.01" inputmode="decimal" required /></label>
         <label>10위 <input id="top10" type="number" step="0.01" inputmode="decimal" required /></label>
@@ -51,25 +72,75 @@
     <!-- 3. 힌트 받기 -->
     <section class="card" id="sec-hint" hidden>
       <h2>3. 힌트 받기</h2>
-      <p class="help" id="hint-help">꼬맨틀에 입력한 단어를 적으면, 그보다 순위가 높은 단어를 알려줍니다. 조금 = 내 순위의 3/4 지점, 보통 = 절반, 많이 = 1/5 지점.</p>
+      <p class="help" id="hint-help">꼬맨틀에 입력한 단어를 적으면, 그보다 순위가 높은 단어를 알려줍니다. 정답은 절대 나오지 않습니다.</p>
       <form id="hint-form">
         <div class="row">
           <label class="grow">단어 <input id="word" type="text" autocomplete="off" required /></label>
           <label id="sim-wrap" hidden>유사도 <input id="sim" type="number" step="0.01" inputmode="decimal" /></label>
         </div>
         <p id="sim-help" class="msg" hidden>이웃 목록에 없는 단어입니다. 꼬맨틀에 나온 유사도를 입력해주세요.</p>
-        <div class="row">
-          <fieldset class="steps">
-            <label><input type="radio" name="step" value="0.75" /> 조금</label>
-            <label><input type="radio" name="step" value="0.5" checked /> 보통</label>
-            <label><input type="radio" name="step" value="0.2" /> 많이</label>
-          </fieldset>
-          <button type="submit">힌트</button>
+        <div class="steps-head">얼마나 가까운 단어를 받을까요? <span id="steps-note" class="opt">단어를 넣으면 막대가 나타납니다. 마젠타 손잡이를 끌어 정하세요.</span></div>
+        <div id="rankbar" class="rankbar" hidden>
+          <div class="rankbar-track">
+            <div class="rankbar-marks" id="rankbar-marks"></div>
+            <span class="rankbar-me" id="rankbar-me"></span>
+            <input type="range" id="target" min="0" max="1000" step="1" value="500" aria-label="힌트 목표 순위" />
+          </div>
+          <div class="rankbar-scale"><span>1,000위</span><span>100위</span><span>10위</span><span>1위</span></div>
+          <div class="rankbar-legend">
+            <span><i class="dot me"></i> 내 단어 <b id="rankbar-me-text"></b></span>
+            <span><i class="dot target"></i> 힌트 위치 <b id="rankbar-target-text"></b> <span class="opt" id="rankbar-preview"></span></span>
+            <span><i class="dot mark"></i> 받은 힌트 · <i class="dot me"></i> 입력한 단어</span>
+          </div>
+        </div>
+        <div class="row actions">
+          <div class="counts"><span class="opt">개수</span>
+            <button type="button" class="count-chip" data-n="3">3개</button>
+            <button type="button" class="count-chip is-on" data-n="5">5개</button>
+            <button type="button" class="count-chip" data-n="10">10개</button>
+            <input type="number" id="count" min="1" max="30" value="5" inputmode="numeric" aria-label="힌트 개수" />
+          </div>
+          <div class="btns">
+            <button type="button" id="next-btn" class="secondary" title="방금 받은 힌트 중 가장 가까운 단어를 내 단어로 삼아 다시 받습니다" hidden>다음 힌트 →</button>
+            <button type="submit">힌트</button>
+          </div>
         </div>
       </form>
       <p id="hint-msg" class="msg"></p>
       <div id="my-word" class="mine"></div>
       <ul id="hints" class="hints"></ul>
+
+      <details id="browse" class="browse">
+        <summary>순위 구간 보기 <span class="opt">(정답의 이웃 1,000개를 순위·유사도로 잘라 봅니다 · 스포일러 주의)</span></summary>
+        <div class="browse-body">
+          <div class="row browse-form">
+            <label>기준
+              <select id="browse-mode">
+                <option value="rank">순위</option>
+                <option value="sim">유사도</option>
+              </select>
+            </label>
+            <label>부터 (먼 쪽) <input id="browse-from" type="number" inputmode="decimal" value="300" /></label>
+            <label>까지 (가까운 쪽) <input id="browse-to" type="number" inputmode="decimal" value="100" /></label>
+            <button type="button" id="browse-btn">보기</button>
+          </div>
+          <div class="browse-quick">
+            <span class="opt">빠른 선택</span>
+            <button type="button" class="quick" data-from="1000" data-to="500">1,000→500</button>
+            <button type="button" class="quick" data-from="500" data-to="200">500→200</button>
+            <button type="button" class="quick" data-from="200" data-to="100">200→100</button>
+            <button type="button" class="quick" data-from="100" data-to="50">100→50</button>
+            <button type="button" class="quick" data-from="50" data-to="10">50→10</button>
+            <button type="button" class="quick" id="quick-near">내 단어 주변 ±20</button>
+          </div>
+          <p id="browse-msg" class="msg"></p>
+          <ol id="browse-list" class="browse-list"></ol>
+          <div class="row">
+            <button type="button" id="browse-more" class="secondary" hidden>더 보기</button>
+            <button type="button" id="browse-unlock" class="secondary" hidden>10위 안 열기 (스포일러)</button>
+          </div>
+        </div>
+      </details>
 
       <h3>입력한 단어</h3>
       <table id="history">
