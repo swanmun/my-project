@@ -96,31 +96,28 @@ export default function Garden() {
 
       {/* 땅: 누르면 그 자리에 꽃이 핍니다 */}
       <div className="relative w-full cursor-crosshair" style={{ height: PAGE_HEIGHT }} onClick={onGroundClick}>
-        {flowers.map((f) => (
-          <FlowerSprite key={f.id} f={f} night={night} wind={wind} />
-        ))}
+        <AnimatePresence>
+          {flowers.map((f, i) => (
+            <FlowerSprite key={f.id} f={f} night={night} wind={wind} order={i} />
+          ))}
+        </AnimatePresence>
       </div>
 
-      {/* 조작 버튼 */}
-      <div className="fixed bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/50 bg-white/40 p-1.5 shadow-lg backdrop-blur-md">
-        <button
-          type="button"
-          onClick={bloomRandom}
-          className="rounded-full bg-[#E8935A] px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5"
-        >
-          피우기
-        </button>
-        <Ctl onClick={blowWind}>바람</Ctl>
-        <Ctl onClick={() => setNight((n) => !n)}>{night ? "낮" : "밤"}</Ctl>
-        <Ctl onClick={() => setFlowers([])}>지우기</Ctl>
+      {/* 조작 창: Halftone OS 창. 꽃과 배경은 작품이라 그대로, 조작 UI만 시스템을 따른다 */}
+      <div className="fixed bottom-6 left-1/2 z-10 -translate-x-1/2 bg-white shadow-[0_0_0_1px_#1e1e1e]">
+        <div className="flex h-5 items-center bg-[#1e1e1e] px-1.5 text-[13px] font-medium text-white">garden 0.01</div>
+        <div className="flex items-center gap-1 p-1.5">
+          <button type="button" onClick={bloomRandom} className="ht-chip ht-chip--solid">
+            피우기
+          </button>
+          <Ctl onClick={blowWind}>바람</Ctl>
+          <Ctl onClick={() => setNight((n) => !n)}>{night ? "낮" : "밤"}</Ctl>
+          <Ctl onClick={() => setFlowers([])}>지우기</Ctl>
+        </div>
       </div>
 
-      <p
-        className={`pointer-events-none fixed top-5 left-1/2 -translate-x-1/2 text-xs tracking-[0.3em] ${
-          night ? "text-white/60" : "text-zinc-500"
-        }`}
-      >
-        정원 · 아무 곳이나 눌러 보세요
+      <p className="pointer-events-none fixed top-4 left-4 z-10 inline-flex h-[18px] items-center bg-[#1e1e1e] px-1 text-[12px] font-medium text-white">
+        GARDEN 0.01 · 아무 곳이나 눌러 보세요
       </p>
     </div>
   );
@@ -128,18 +125,25 @@ export default function Garden() {
 
 function Ctl({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-full px-4 py-2.5 text-sm text-zinc-700 transition hover:bg-white/70"
-    >
+    <button type="button" onClick={onClick} className="ht-chip">
       {children}
     </button>
   );
 }
 
 // ---------- 꽃 한 송이 ----------
-function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: number }) {
+// 지우기 때 꽃잎이 바람에 날리듯 오른쪽 위로 흩어진다. 꽃마다·꽃잎마다 방향이 조금씩 다르다(id 기반 고정 난수).
+const seeded = (a: number, b: number) => { const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return x - Math.floor(x); };
+
+function FlowerSprite({ f, night, wind, order }: { f: Flower; night: boolean; wind: number; order: number }) {
+  const baseDelay = Math.min(order * 0.012, 0.5) + seeded(f.id, 99) * 0.25;
+  const petalExit = (i: number) => ({
+    x: 60 + 90 * seeded(f.id, i),
+    y: -(40 + 130 * seeded(f.id, i + 50)),
+    rotate: 120 + 240 * seeded(f.id, i + 100),
+    opacity: 0,
+    transition: { duration: 1.1 + 0.4 * seeded(f.id, i + 150), delay: baseDelay + i * 0.04, ease: "easeIn" as const },
+  });
   const outerPath = petalPath(f.len, f.width);
   const innerPath = petalPath(f.len * 0.6, f.width * 0.7);
   const size = f.len * 2 + 20;
@@ -159,6 +163,7 @@ function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: num
       className="pointer-events-none absolute"
       style={{ left: f.x, top: f.y, width: 0, height: 0, transformOrigin: "0px 0px" }}
       animate={sway}
+      exit={{ opacity: 0, transition: { duration: 0.5, delay: baseDelay + 0.9 } }}
     >
       <svg
         width={size}
@@ -182,6 +187,7 @@ function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: num
           strokeLinecap="round"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
+          exit={{ pathLength: 0, transition: { duration: 0.6, delay: baseDelay + 0.6, ease: "easeIn" } }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         />
         {/* 잎 */}
@@ -194,6 +200,7 @@ function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: num
             fill={night ? "#B9C9A9" : "#B5D7A8"}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0, transition: { duration: 0.4, delay: baseDelay + 0.5 } }}
             transition={{ delay: 0.35, duration: 0.4 }}
             style={{ transformBox: "fill-box", transformOrigin: f.leafSide > 0 ? "0% 50%" : "100% 50%" }}
           />
@@ -208,6 +215,7 @@ function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: num
                 fillOpacity={0.92}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
+                exit={petalExit(i)}
                 transition={{ delay: 0.55 + i * 0.06, type: "spring", stiffness: 160, damping: 12 }}
                 style={petalStyle}
               />
@@ -221,6 +229,7 @@ function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: num
                 fillOpacity={0.9}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
+                exit={petalExit(i + 20)}
                 transition={{ delay: 0.75 + i * 0.05, type: "spring", stiffness: 160, damping: 12 }}
                 style={petalStyle}
               />
@@ -231,6 +240,7 @@ function FlowerSprite({ f, night, wind }: { f: Flower; night: boolean; wind: num
             fill={f.core}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
+            exit={{ scale: 0, opacity: 0, transition: { duration: 0.4, delay: baseDelay + 0.7 } }}
             transition={{ delay: 1.0, type: "spring", stiffness: 200, damping: 10 }}
             style={{ transformBox: "fill-box", transformOrigin: "50% 50%" }}
           />
