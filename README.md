@@ -9,7 +9,7 @@
 
 소개 페이지: https://my-project-beige-rho-63.vercel.app
 
-사이트에는 이 두 작품만 있습니다. 로그인·DB·지도·결제는 넣지 않습니다. PRD는 `docs/PRD.md`, 솔버 원리와 한계는 `docs/솔버-원리.md`.
+사이트에는 이 두 작품만 있습니다. 로그인·DB·지도·결제는 넣지 않습니다. 솔버 원리와 한계는 `docs/솔버-원리.md`.
 
 ## 디자인
 
@@ -75,6 +75,6 @@ src/
 └─ lib/site.ts               # 사이트명, 메뉴, 솔버·꼬맨틀 원본 주소
 komantle/                    # 꼬맨틀 솔버 (자세한 내용은 komantle/README.md)
 public/komantle-original.png # 소개 페이지에 넣은 꼬맨틀 원본 화면 캡처 (출처: 뉴스젤리)
-docs/                        # PRD.md, 솔버-원리.md
+docs/솔버-원리.md            # 솔버 원리와 한계 (발표용)
 .claude/skills/halftone-design/   # 디자인 규칙 (UI 작업 전 읽기)
 ```
