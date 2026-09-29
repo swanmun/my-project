@@ -16,6 +16,7 @@ komantle/
   precompute.py        FastText 벡터 → data/komantle_index.npz (후보별 이웃 1,000개·지문)
   export_web_data.py   npz → web_data/komantle-data/ (fp.bin, n/*.json, meta.json)
   export_vectors.py    단어 벡터 → web_data/komantle-data/{cand.bin, vec/} (단서 대조용)
+  solver.py            데이터 경로·로더 (export 스크립트가 불러 씀)
   web/                 페이지 소스 (index.html, app.js, solver.js, style.css)
   test/                Node 테스트 (1630·1642회차 기준)
   scripts/build.mjs    web/ + web_data/ → dist/ 조립
